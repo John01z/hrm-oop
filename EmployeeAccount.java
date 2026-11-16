@@ -1,25 +1,46 @@
+import java.util.Scanner;
+
 public class EmployeeAccount extends Account {
+    private Employee employee;
+    private final AbsenceService absenceService = new AbsenceService();
+    private final ResignationService resignationService = new ResignationService();
+    private final AttendanceService attendanceService = new AttendanceService();
+
     public EmployeeAccount(String username, String password, AccountStatus status) {
         super(username, password, status);
     }
 
-    public void submitAbsence() {
-        System.out.println("Nhân viên gửi đơn xin nghỉ phép.");
+    public EmployeeAccount(String username, String password, AccountStatus status, Employee employee) {
+        super(username, password, status);
+        this.employee = employee;
     }
 
-    public void submitResignation() {
-        System.out.println("Nhân viên nộp đơn từ chức/thôi việc.");
+    public Employee getEmployee() {
+        return employee;
     }
 
-    public void checkIn() {
-        System.out.println("Nhân viên chấm công vào (Check-in).");
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
-    public void checkOut() {
-        System.out.println("Nhân viên chấm công ra (Check-out).");
+    public void submitAbsence(Scanner sc) {
+        absenceService.submitAbsence(this.employee, sc);
     }
 
-    public void viewAttendance() {
-        System.out.println("Xem lịch sử chấm công.");
+    public void submitResignation(Scanner sc) {
+        resignationService.submitResignation(this.employee, sc);
+    }
+
+    public void checkIn(Scanner sc) {
+        attendanceService.checkIn(this.employee, sc);
+    }
+
+    public void checkOut(Scanner sc) {
+        attendanceService.checkOut(this.employee, sc);
+    }
+
+    public void viewAttendance(Scanner sc) {
+        attendanceService.viewAttendance(this.employee, sc);
     }
 }
+
