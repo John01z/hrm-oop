@@ -689,6 +689,23 @@ public class Main {
     return -1;
   }
 
+  // Hàm tự động liên kết tài khoản EmployeeAccount với Employee tương ứng
+  private static void linkAccountsToEmployees() {
+    if (data == null || data.getAccounts() == null || data.getEmployees() == null) return;
+    for (Account acc : data.getAccounts()) {
+      if (acc instanceof EmployeeAccount) {
+        EmployeeAccount empAcc = (EmployeeAccount) acc;
+        for (Employee emp : data.getEmployees()) {
+          if (emp != null && (emp.getId().equalsIgnoreCase(empAcc.getUsername())
+              || emp.getFirstName().equalsIgnoreCase(empAcc.getUsername()))) {
+            empAcc.setEmployee(emp);
+            break;
+          }
+        }
+      }
+    }
+  }
+
   private static void runEmployeeUI(EmployeeAccount account, Scanner sc) {
     String title = "Employee Account";
     String subtitle = "Choose an option";
@@ -730,19 +747,19 @@ public class Main {
           }
           break;
         case 4:
-          account.submitAbsence();
+          account.submitAbsence(sc); 
           break;
         case 5:
-          account.submitResignation();
+          account.submitResignation(sc); 
           break;
         case 6:
-          account.checkIn();
+          account.checkIn(sc); 
           break;
         case 7:
-          account.checkOut();
+          account.checkOut(sc); 
           break;
         case 8:
-          account.viewAttendance();
+          account.viewAttendance(sc); 
           break;
 
         default:
@@ -991,6 +1008,7 @@ public class Main {
 
         data.writeSampleData();
         data.readData();
+        linkAccountsToEmployees(); 
 
         departmentsOccupied = getOccupied(data.getDepartments());
         positionsOccupied = getOccupied(data.getPositions());
@@ -1096,6 +1114,7 @@ public class Main {
           limits.getMaxInsurances());
 
       data.readData();
+      linkAccountsToEmployees(); 
     }
 
     runUI(sc);
