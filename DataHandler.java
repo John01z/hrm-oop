@@ -212,7 +212,7 @@ public class DataHandler {
             thisAttendances[idx] = new Attendance();
             thisAttendances[idx].setDate(LocalDate.parse(tmp));
             thisAttendances[idx].setClockIn(LocalTime.parse(sc.nextLine()));
-            thisAttendances[idx].setClockOut(LocalTime.parse(sc.nextLine()));
+            String outStr = sc.nextLine(); thisAttendances[idx].setClockOut(outStr.equals("null") ? null : LocalTime.parse(outStr));
 
             sc.nextLine();
             idx++;
