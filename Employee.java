@@ -80,6 +80,84 @@ public class Employee extends Person {
     this.department = department;
   }
 
+  private int getEvaluationsOccupied() {
+    int count = 0;
+    for (int i = 0; i < getEvaluations().length; i++) {
+      if (getEvaluations()[i] == null) {
+        break;
+      }
+
+      count++;
+    }
+
+    return count;
+  }
+
+  private int getContractsOccupied() {
+    int count = 0;
+    for (int i = 0; i < getContracts().length; i++) {
+      if (getContracts()[i] == null) {
+        break;
+      }
+
+      count++;
+    }
+
+    return count;
+  }
+
+  private int getPayrollsOccupied() {
+    int count = 0;
+    for (int i = 0; i < getPayrolls().length; i++) {
+      if (getPayrolls()[i] == null) {
+        break;
+      }
+
+      count++;
+    }
+
+    return count;
+  }
+
+  private int getAttendancesOccupied() {
+    int count = 0;
+    for (int i = 0; i < getAttendances().length; i++) {
+      if (getAttendances()[i] == null) {
+        break;
+      }
+
+      count++;
+    }
+
+    return count;
+  }
+
+  private int getResignationsOccupied() {
+    int count = 0;
+    for (int i = 0; i < getResignations().length; i++) {
+      if (getResignations()[i] == null) {
+        break;
+      }
+
+      count++;
+    }
+
+    return count;
+  }
+
+  private int getInsurancesOccupied() {
+    int count = 0;
+    for (int i = 0; i < getInsurances().length; i++) {
+      if (getInsurances()[i] == null) {
+        break;
+      }
+
+      count++;
+    }
+
+    return count;
+  }
+
   public String getInfo(Scanner sc) {
     String content = "";
 
@@ -87,13 +165,13 @@ public class Employee extends Person {
     content += "Ngày tuyển dụng: " + getHireDate() + "\n";
     content += "Chuyên môn: " + getSpecialization() + "\n";
     content += "Trạng thái: " + getStatus() + "\n";
-    content += "Số đánh giá: " + getEvaluations().length + "\n";
-    content += "Số hợp đồng: " + getContracts().length + "\n";
-    content += "Số bảng lương: " + getPayrolls().length + "\n";
-    content += "Số lượt chấm công: " + getAttendances().length + "\n";
-    content += "Số đơn thôi việc: " + getResignations().length + "\n";
+    content += "Số đánh giá: " + getEvaluationsOccupied() + "\n";
+    content += "Số hợp đồng: " + getContractsOccupied() + "\n";
+    content += "Số bảng lương: " + getPayrollsOccupied() + "\n";
+    content += "Số lượt chấm công: " + getAttendancesOccupied() + "\n";
+    content += "Số đơn thôi việc: " + getResignationsOccupied() + "\n";
     content += "Mã số thuế: " + getTaxId() + "\n";
-    content += "Số bảo hiểm: " + getInsurances().length + "\n";
+    content += "Số bảo hiểm: " + getInsurancesOccupied() + "\n";
     content += "Chức vụ: " + getPosition().getName() + "\n";
     content += "Phòng ban: " + getDepartment().getName() + "\n";
 
