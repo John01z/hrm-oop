@@ -29,6 +29,15 @@ public class ConsoleUI {
   }
 
   private void printContent(String content) {
+    if (content == null) {
+      content = "N/A";
+    }
+
+    if (content.length() > CONTENT_WIDTH) {
+      content = content.substring(0, CONTENT_WIDTH - 3);
+      content += "...";
+    }
+
     int rightPadding = CONTENT_WIDTH - 1 - content.length();
     System.out.printf("║ %s" + " ".repeat(rightPadding) + "║%n", content);
   }
