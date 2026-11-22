@@ -41,10 +41,28 @@ public class Employee extends Person {
     this.department = null;
   }
 
-  public Employee(String firstName, String lastName, String email, String phone, LocalDate dateOfBirth, String gender,
-      Address address, String id, LocalDate hireDate, String specialization, Employee.EmployeeStatus status,
-      Evaluation[] evaluations, Contract[] contracts, Payroll[] payrolls, Attendance[] attendances,
-      Resignation[] resignations, String taxId, Insurance[] insurances, Position position, Department department) {
+  public Employee(
+      String firstName,
+      String lastName,
+      String email,
+      String phone,
+      LocalDate dateOfBirth,
+      String gender,
+      Address address,
+      String id,
+      LocalDate hireDate,
+      String specialization,
+      Employee.EmployeeStatus status,
+      Evaluation[] evaluations,
+      Contract[] contracts,
+      Payroll[] payrolls,
+      Attendance[] attendances,
+      Absence[] absences,
+      Resignation[] resignations,
+      String taxId,
+      Insurance[] insurances,
+      Position position,
+      Department department) {
     super(firstName, lastName, email, phone, dateOfBirth, gender, address);
     this.id = id;
     this.hireDate = hireDate;
@@ -54,6 +72,7 @@ public class Employee extends Person {
     this.contracts = contracts;
     this.payrolls = payrolls;
     this.attendances = attendances;
+    this.absences = absences;
     this.resignations = resignations;
     this.taxId = taxId;
     this.insurances = insurances;

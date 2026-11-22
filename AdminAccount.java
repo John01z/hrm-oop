@@ -740,23 +740,23 @@ public class AdminAccount extends Account {
 
         String title = "Tạo nhân viên";
         String subtitle = "Tạo địa chỉ";
-        String[] options = {};
+        String contents = "";
         String input;
 
         input = "Số";
-        String number = console.printUI(title, subtitle, options, input, sc);
+        String number = console.printUI(title, subtitle, contents, input, sc);
 
         input = "Đường";
-        String street = console.printUI(title, subtitle, options, input, sc);
+        String street = console.printUI(title, subtitle, contents, input, sc);
 
         input = "Phường";
-        String ward = console.printUI(title, subtitle, options, input, sc);
+        String ward = console.printUI(title, subtitle, contents, input, sc);
 
         input = "Quận/Huyện";
-        String district = console.printUI(title, subtitle, options, input, sc);
+        String district = console.printUI(title, subtitle, contents, input, sc);
 
         input = "Thành phố";
-        String city = console.printUI(title, subtitle, options, input, sc);
+        String city = console.printUI(title, subtitle, contents, input, sc);
 
         return new Address(number, street, ward, district, city);
     }
@@ -962,6 +962,35 @@ public class AdminAccount extends Account {
         } while (clockIn.isAfter(clockOut));
 
         return new Attendance(date, clockIn, clockOut);
+    }
+
+    public Absence createAbsence(Scanner sc) {
+        ConsoleUI console = new ConsoleUI();
+
+        String title = "Tạo nhân viên";
+        String subtitle = "Tạo chấm công";
+        String content = "";
+        String[] options = {};
+        String input;
+
+        input = "Lý do";
+        String reason = console.printUI(title, subtitle, content, input, sc);
+
+        LocalDate fromDate;
+        LocalDate toDate;
+        do {
+            input = "Từ ngày (dd/MM/yyyy): ";
+            fromDate = console.printDateUI(title, subtitle, options, input, sc);
+
+            input = "Đến ngày (dd/MM/yyyy): ";
+            toDate = console.printDateUI(title, subtitle, options, input, sc);
+
+            if (fromDate.isAfter(toDate)) {
+                console.printResult(title, "Giờ vào nên trước giờ ra", sc);
+            }
+        } while (fromDate.isAfter(toDate));
+
+        return new Absence(reason, fromDate, toDate, Absence.AbsenceStatus.PENDING);
     }
 
     public Insurance createInsurance(Scanner sc) {
@@ -1185,6 +1214,41 @@ public class AdminAccount extends Account {
             }
 
             attendances[index] = createAttendance(sc);
+            index++;
+        } while (choice < 0 || 1 < choice);
+
+        return attendances;
+    }
+
+    public Absence[] createAbsences(LimitHandler limits, Scanner sc) {
+        ConsoleUI console = new ConsoleUI();
+
+        String title = "Tạo nhân viên";
+        String subtitle = "Tạo danh sách đơn xin nghỉ";
+        String[] options = { "Thoát", "Tạo đơn chấm công" };
+
+        int index = 0;
+        Absence[] attendances = new Absence[limits.getMaxAbsences()];
+
+        int choice;
+        do {
+            choice = validateInt(console.printUI(title, subtitle, options, sc));
+
+            if (choice < 0 || 1 < choice) {
+                console.printResult(title, "Lựa chọn không hợp lệ", sc);
+                continue;
+            }
+
+            if (choice == 0) {
+                break;
+            }
+
+            if (index + 1 < limits.getMaxAbsences()) {
+                String result = "Danh sách xin nghỉ đã đầy\n" + "Tối đa: %d" + limits.getMaxAbsences();
+                console.printResult(title, result, sc);
+            }
+
+            attendances[index] = createAbsence(sc);
             index++;
         } while (choice < 0 || 1 < choice);
 
@@ -1431,6 +1495,7 @@ public class AdminAccount extends Account {
         Contract[] contracts = createContracts(limits, sc);
         Payroll[] payrolls = createPayrolls(limits, sc);
         Attendance[] attendances = createAttendances(limits, sc);
+        Absence[] absences = createAbsences(limits, sc);
         Resignation[] resignations = createResignations(limits, sc);
 
         input = "Mã số thuế";
@@ -1442,9 +1507,9 @@ public class AdminAccount extends Account {
         Department department = chooseDepartment(data, limits, sc);
 
         return new Employee(firstName, lastName, email, phone, dateOfBirth, gender, address, id, hireDate,
-                specialization,
-                status, evaluations, contracts, payrolls, attendances, resignations, taxId, insurances, position,
-                department);
+                specialization, status,
+                evaluations, contracts, payrolls, attendances, absences, resignations, taxId,
+                insurances, position, department);
     }
 
     private Employee selectEmployeePrompt(Employee[] employees, String title, Scanner sc) {
