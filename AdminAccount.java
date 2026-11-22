@@ -959,7 +959,7 @@ public class AdminAccount extends Account {
             if (clockIn.isAfter(clockOut)) {
                 console.printResult(title, "Giờ vào nên trước giờ ra", sc);
             }
-        } while (clockIn.isBefore(clockOut));
+        } while (clockIn.isAfter(clockOut));
 
         return new Attendance(date, clockIn, clockOut);
     }
@@ -1012,7 +1012,7 @@ public class AdminAccount extends Account {
             if (startDate.isAfter(endDate)) {
                 console.printResult(title, "Ngày bắt đầu nên trước ngày kết thúc", sc);
             }
-        } while (startDate.isBefore(endDate));
+        } while (startDate.isAfter(endDate));
 
         input = "Mức: ";
         double rate = Double.parseDouble(console.printUI(title, subtitle, options, input, sc));
