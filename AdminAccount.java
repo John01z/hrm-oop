@@ -1370,36 +1370,33 @@ public class AdminAccount extends Account {
         return insurances;
     }
 
-    public Position choosePosition(DataHandler data, LimitHandler limits, Scanner sc) {
+    public int choosePosition(DataHandler data, LimitHandler limits, Scanner sc) {
         ConsoleUI console = new ConsoleUI();
 
         String title = "Tạo nhân viên";
         String subtitle = "Chọn chức vụ";
-        String[] options = { "Thoát", "Chọn chức vụ" };
 
         int positionsOccupied = 0;
         for (int i = 0; i < data.getPositions().length; i++) {
-            if (data.getPositions()[i] != null) {
-                positionsOccupied++;
-            }
+            if (data.getPositions()[i] == null)
+                break;
+
+            positionsOccupied++;
         }
 
         if (positionsOccupied < 0) {
             console.printResult(title, "Không có chức vụ nào", sc);
-            return null;
+            return -1;
+        }
+
+        String[] options = new String[positionsOccupied];
+
+        for (int i = 0; i < positionsOccupied; i++) {
+            options[i] = data.getPositions()[i].getName();
         }
 
         int index;
         do {
-            String[] positionOptions = new String[limits.getMaxPositions()];
-
-            for (int i = 0; i < data.getPositions().length; i++) {
-                if (data.getPositions()[i] == null) {
-                    break;
-                }
-
-                positionOptions[i] = data.getPositions()[i].getName();
-            }
 
             index = validateInt(console.printUI(title, subtitle, options, sc));
 
@@ -1408,39 +1405,36 @@ public class AdminAccount extends Account {
             }
         } while (index < 0 || index > positionsOccupied);
 
-        return data.getPositions()[index];
+        return index;
     }
 
-    public Department chooseDepartment(DataHandler data, LimitHandler limits, Scanner sc) {
+    public int chooseDepartment(DataHandler data, LimitHandler limits, Scanner sc) {
         ConsoleUI console = new ConsoleUI();
 
         String title = "Tạo nhân viên";
-        String subtitle = "Chọn phòng ban";
-        String[] options = { "Thoát", "Chọn phòng ban" };
+        String subtitle = "Chọn chức vụ";
 
         int departmentsOccupied = 0;
         for (int i = 0; i < data.getDepartments().length; i++) {
-            if (data.getDepartments()[i] != null) {
-                departmentsOccupied++;
-            }
+            if (data.getDepartments()[i] == null)
+                break;
+
+            departmentsOccupied++;
         }
 
         if (departmentsOccupied < 0) {
-            console.printResult(title, "Không có phòng ban nào", sc);
-            return null;
+            console.printResult(title, "Không có chức vụ nào", sc);
+            return -1;
+        }
+
+        String[] options = new String[departmentsOccupied];
+
+        for (int i = 0; i < departmentsOccupied; i++) {
+            options[i] = data.getDepartments()[i].getName();
         }
 
         int index;
         do {
-            String[] departmentOptions = new String[limits.getMaxDepartments()];
-
-            for (int i = 0; i < data.getDepartments().length; i++) {
-                if (data.getDepartments()[i] == null) {
-                    break;
-                }
-
-                departmentOptions[i] = data.getDepartments()[i].getName();
-            }
 
             index = validateInt(console.printUI(title, subtitle, options, sc));
 
@@ -1449,7 +1443,7 @@ public class AdminAccount extends Account {
             }
         } while (index < 0 || index > departmentsOccupied);
 
-        return data.getDepartments()[index];
+        return index;
     }
 
     public Employee createEmployee(DataHandler data, LimitHandler limits, Scanner sc) {
@@ -1522,8 +1516,8 @@ public class AdminAccount extends Account {
 
         Insurance[] insurances = new Insurance[limits.getMaxInsurances()];
 
-        Position position = choosePosition(data, limits, sc);
-        Department department = chooseDepartment(data, limits, sc);
+        Position position = data.getPositions()[choosePosition(data, limits, sc)];
+        Department department = data.getDepartments()[chooseDepartment(data, limits, sc)];
 
         return new Employee(firstName, lastName, email, phone, dateOfBirth, gender, address, id, hireDate,
                 specialization, status,
