@@ -3,6 +3,7 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 
 public class AdminAccount extends Account {
@@ -1489,8 +1490,20 @@ public class AdminAccount extends Account {
             }
         }
 
-        input = "Ngày tuyển dụng (dd/MM/yyyy)";
-        LocalDate hireDate = console.printDateUI(title, subtitle, options, input, sc);
+        LocalDate hireDate;
+        long years;
+        do {
+            input = "Ngày tuyển dụng (dd/MM/yyyy)";
+            hireDate = console.printDateUI(title, subtitle, options, input, sc);
+
+            years = ChronoUnit.YEARS.between(dateOfBirth, hireDate);
+
+            if (dateOfBirth.isAfter(hireDate)) {
+                console.printResult(title, "Ngày tuyển dụng không thể trước ngày sinh", sc);
+            } else if (years < 18) {
+                console.printResult(title, "Không thể tuyển nhân viên trước 18 tuổi", sc);
+            }
+        } while (dateOfBirth.isAfter(hireDate) || years < 18);
 
         input = "Chuyên môn";
         String specialization = console.printUI(title, subtitle, options, input, sc);
