@@ -1229,7 +1229,7 @@ public class AdminAccount extends Account {
         String[] options = { "Thoát", "Tạo đơn chấm công" };
 
         int index = 0;
-        Absence[] attendances = new Absence[limits.getMaxAbsences()];
+        Absence[] absences = new Absence[limits.getMaxAbsences()];
 
         int choice;
         do {
@@ -1249,11 +1249,11 @@ public class AdminAccount extends Account {
                 console.printResult(title, result, sc);
             }
 
-            attendances[index] = createAbsence(sc);
+            absences[index] = createAbsence(sc);
             index++;
         } while (choice < 0 || 1 < choice);
 
-        return attendances;
+        return absences;
     }
 
     public Resignation createResignation(Scanner sc) {
@@ -1510,17 +1510,17 @@ public class AdminAccount extends Account {
 
         Employee.EmployeeStatus status = Employee.EmployeeStatus.WORKING;
 
-        Evaluation[] evaluations = createEvaluations(limits, sc);
-        Contract[] contracts = createContracts(limits, sc);
-        Payroll[] payrolls = createPayrolls(limits, sc);
-        Attendance[] attendances = createAttendances(limits, sc);
-        Absence[] absences = createAbsences(limits, sc);
-        Resignation[] resignations = createResignations(limits, sc);
+        Evaluation[] evaluations = new Evaluation[limits.getMaxEvaluations()];
+        Contract[] contracts = new Contract[limits.getMaxContracts()];
+        Payroll[] payrolls = new Payroll[limits.getMaxPayrolls()];
+        Attendance[] attendances = new Attendance[limits.getMaxAttendances()];
+        Absence[] absences = new Absence[limits.getMaxAbsences()];
+        Resignation[] resignations = new Resignation[limits.getMaxResignations()];
 
         input = "Mã số thuế";
         String taxId = console.printUI(title, subtitle, options, input, sc);
 
-        Insurance[] insurances = createInsurances(limits, sc);
+        Insurance[] insurances = new Insurance[limits.getMaxInsurances()];
 
         Position position = choosePosition(data, limits, sc);
         Department department = chooseDepartment(data, limits, sc);
