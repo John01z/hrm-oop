@@ -1076,11 +1076,11 @@ public class DataHandler {
     String data = "";
 
     String[][] samples = {
-        { "Information Technology", "02812345678", "C.A206" },
-        { "Human Resources", "02812345679", "1.B302" },
-        { "Financial Management", "02812345680", "2.D103" },
-        { "Marketing and Communications", "02812345681", "C.E403" },
-        { "Sales and Business Development", "02812345682", "C.A209" }
+        { "Công nghệ thông tin", "02812345678", "C.A206" },
+        { "Nhân sự", "02812345679", "1.B302" },
+        { "Quản lý tài chính", "02812345680", "2.D103" },
+        { "Tiếp thị và Truyền thông", "02812345681", "C.E403" },
+        { "Kinh doanh và Phát triển thị trường", "02812345682", "C.A209" }
     };
 
     for (String[] sample : samples) {

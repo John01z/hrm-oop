@@ -62,6 +62,6 @@ public class Address {
     }
 
     public String getFullAddress() {
-        return this.number + " " + this.street + ", " + this.ward + ", " + this.district + ", " + this.city;
+        return this.number + " " + this.street + ", Phường " + this.ward + ", Quận " + this.district + ", " + this.city;
     }
 }
