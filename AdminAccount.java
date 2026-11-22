@@ -3,7 +3,6 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 
 public class AdminAccount extends Account {
@@ -21,9 +20,13 @@ public class AdminAccount extends Account {
         return -1;
     }
 
-    private static int getIndex(DataHandler data, String username) {
-        for (int i = 0; i < data.getAccounts().length; i++) {
-            if (data.getAccounts()[i] != null && data.getAccounts()[i].getUsername().equalsIgnoreCase(username)) {
+    private static int getIndex(DataHandler data, String id) {
+        if (data == null || data.getEmployees() == null || id == null) {
+            return -1;
+        }
+        for (int i = 0; i < data.getEmployees().length; i++) {
+            if (data.getEmployees()[i] != null && data.getEmployees()[i].getId() != null
+                    && data.getEmployees()[i].getId().equalsIgnoreCase(id.trim())) {
                 return i;
             }
         }
@@ -55,7 +58,7 @@ public class AdminAccount extends Account {
         result += "Tên đăng nhập: " + this.getUsername() + "\n";
         result += "Trạng thái: " + this.getStatus() + "\n";
 
-        console.printResult("Thông tin nhân viên", result, sc);
+        console.printResult("Thông tin quản trị viên", result, sc);
     }
 
     public void addEmployee(Employee[] employees, Employee employee, Scanner sc) {
@@ -77,10 +80,14 @@ public class AdminAccount extends Account {
     }
 
     public void addEmployeeAccount(Account[] accounts, Employee emp) {
+        if (accounts == null || emp == null) {
+            return;
+        }
         for (int i = 0; i < accounts.length; i++) {
             if (accounts[i] == null) {
-                EmployeeAccount acc = new EmployeeAccount(emp.getId(), DEFAULT_PASSWORD, Account.AccountStatus.ACTIVE);
+                EmployeeAccount acc = new EmployeeAccount(emp.getId(), DEFAULT_PASSWORD, Account.AccountStatus.ACTIVE, emp);
                 accounts[i] = acc;
+                return;
             }
         }
     }
@@ -101,9 +108,10 @@ public class AdminAccount extends Account {
         String title = "Xóa nhân viên";
 
         for (int i = 0; i < employees.length; i++) {
-            if (employees[i] != null && employees[i].getId().equals(id)) {
+            if (employees[i] != null && employees[i].getId() != null
+                    && employees[i].getId().equalsIgnoreCase(id.trim())) {
                 employees[i] = null;
-                console.printResult(title, "Đã xóa tài khoản: " + id, sc);
+                console.printResult(title, "Đã xóa nhân viên: " + id, sc);
                 return;
             }
         }
@@ -117,7 +125,8 @@ public class AdminAccount extends Account {
         String title = "Xóa tài khoản";
 
         for (int i = 0; i < accounts.length; i++) {
-            if (accounts[i] != null && accounts[i].getUsername().equals(id)) {
+            if (accounts[i] != null && accounts[i].getUsername() != null
+                    && accounts[i].getUsername().equalsIgnoreCase(id.trim())) {
                 accounts[i] = null;
                 console.printResult(title, "Đã xóa tài khoản: " + id, sc);
                 return;
@@ -134,7 +143,7 @@ public class AdminAccount extends Account {
 
         for (int i = 0; i < accounts.length; i++) {
             if (accounts[i] != null && accounts[i].getUsername().equals(username)) {
-                console.printResult(title, "Quản trị viên phan hoi " + username + ": " + reply, sc);
+                console.printResult(title, "Quản trị viên phản hồi " + username + ": " + reply, sc);
                 return;
             }
         }
@@ -146,12 +155,42 @@ public class AdminAccount extends Account {
     }
 
     public Employee searchEmployee(Employee[] employees, String id) {
+        if (employees == null || id == null) {
+            return null;
+        }
         for (int i = 0; i < employees.length; i++) {
-            if (employees[i] != null && employees[i].getId().equals(id)) {
+            if (employees[i] != null && employees[i].getId() != null
+                    && employees[i].getId().equalsIgnoreCase(id.trim())) {
                 return employees[i];
             }
         }
         return null;
+    }
+
+    private String padCenter(String text, int width) {
+        String s = text == null ? "" : text;
+        if (s.length() > width) {
+            s = s.substring(0, width);
+        }
+        int left = (width - s.length()) / 2;
+        int right = width - s.length() - left;
+        return " ".repeat(Math.max(0, left)) + s + " ".repeat(Math.max(0, right));
+    }
+
+    private String padLeft(String text, int width) {
+        String s = text == null ? "" : text;
+        if (s.length() > width) {
+            s = s.substring(0, width);
+        }
+        return " ".repeat(Math.max(0, width - s.length())) + s;
+    }
+
+    private String padRight(String text, int width) {
+        String s = text == null ? "" : text;
+        if (s.length() > width) {
+            s = s.substring(0, width);
+        }
+        return s + " ".repeat(Math.max(0, width - s.length()));
     }
 
     public String getPositions(Position[] positions) {
@@ -162,20 +201,10 @@ public class AdminAccount extends Account {
         final int RESPONSIBILITY_WIDTH = TABLE_WIDTH - NUMBER_WIDTH - NAME_WIDTH - POSITION_COEFFICIENT_WIDTH -
                 (3 * 2 - 2);
 
-        int nameLeftPadding = (NAME_WIDTH - 4) / 2;
-        int positionCoefficientLeftPadding = (POSITION_COEFFICIENT_WIDTH - 20) / 2;
-        int responsibilityLeftPadding = (RESPONSIBILITY_WIDTH - 16) / 2;
-        int nameRightPadding = NAME_WIDTH - nameLeftPadding - 4;
-        int positionCoefficientRightPadding = POSITION_COEFFICIENT_WIDTH - positionCoefficientLeftPadding - 20;
-        int responsibilityRightPadding = RESPONSIBILITY_WIDTH - responsibilityLeftPadding - 16;
-
-        String header = "| " + " ".repeat(NUMBER_WIDTH) + " | " +
-                " ".repeat(nameLeftPadding) + "Tên" + " ".repeat(nameRightPadding) + " | " +
-                " ".repeat(positionCoefficientLeftPadding) + "Hệ số chức vụ"
-                + " ".repeat(positionCoefficientRightPadding)
-                + " | " +
-                " ".repeat(responsibilityLeftPadding) + "Trách nhiệm" + " ".repeat(responsibilityRightPadding)
-                + " |\n";
+        String header = "| " + " ".repeat(NUMBER_WIDTH) + " | "
+                + padCenter("Tên", NAME_WIDTH) + " | "
+                + padCenter("Hệ số chức vụ", POSITION_COEFFICIENT_WIDTH) + " | "
+                + padCenter("Trách nhiệm", RESPONSIBILITY_WIDTH) + " |\n";
 
         String separateLine = "| " + "-".repeat(NUMBER_WIDTH) + " | " +
                 "-".repeat(NAME_WIDTH) + " | " +
@@ -184,27 +213,16 @@ public class AdminAccount extends Account {
 
         String content = "";
 
-        content += "Danh sach vi tri\n\n";
+        content += "Danh sách chức vụ\n\n";
         content += header;
         content += separateLine;
         for (int i = 0; i < positions.length; i++) {
             if (positions[i] != null) {
                 Position current = positions[i];
-
-                int numberLength = Integer.toString(i).length();
-                int nameLength = current.getName().length();
-                int positionCoefficientLength = Double.toString(current.getPositionCoefficient()).length();
-                int responsibilityLength = current.getResponsibilities().length();
-
-                int numberPadding = NUMBER_WIDTH - numberLength;
-                int namePadding = NAME_WIDTH - nameLength;
-                int positionCoefficientPadding = POSITION_COEFFICIENT_WIDTH - positionCoefficientLength;
-                int responsibilityPadding = RESPONSIBILITY_WIDTH - responsibilityLength;
-
-                content += "| " + " ".repeat(numberPadding) + (i + 1) + " | " +
-                        current.getName() + " ".repeat(namePadding) + " | " +
-                        " ".repeat(positionCoefficientPadding) + current.getPositionCoefficient() + " | " +
-                        current.getResponsibilities() + " ".repeat(responsibilityPadding) + " |\n";
+                content += "| " + padLeft(Integer.toString(i + 1), NUMBER_WIDTH) + " | "
+                        + padRight(current.getName(), NAME_WIDTH) + " | "
+                        + padLeft(Double.toString(current.getPositionCoefficient()), POSITION_COEFFICIENT_WIDTH) + " | "
+                        + padRight(current.getResponsibilities(), RESPONSIBILITY_WIDTH) + " |\n";
             }
         }
 
@@ -215,22 +233,14 @@ public class AdminAccount extends Account {
         final int TABLE_WIDTH = 109;
         final int NUMBER_WIDTH = 3;
         final int NAME_WIDTH = 30;
-        final int PHONE_WIDTH = 11;
+        final int PHONE_WIDTH = 12;
         final int POSITION_WIDTH = TABLE_WIDTH - NUMBER_WIDTH - NAME_WIDTH - PHONE_WIDTH -
                 (3 * 2 - 2);
 
-        int nameLeftPadding = (NAME_WIDTH - 4) / 2;
-        int phoneLeftPadding = (PHONE_WIDTH - 5) / 2;
-        int positionLeftPadding = (POSITION_WIDTH - 8) / 2;
-        int nameRightPadding = NAME_WIDTH - nameLeftPadding - 4;
-        int phoneRightPadding = PHONE_WIDTH - phoneLeftPadding - 5;
-        int positionRightPadding = POSITION_WIDTH - positionLeftPadding - 8;
-
-        String header = "| " + " ".repeat(NUMBER_WIDTH) + " | " +
-                " ".repeat(nameLeftPadding) + "Tên" + " ".repeat(nameRightPadding) + " | " +
-                " ".repeat(phoneLeftPadding) + "Điện thoại" + " ".repeat(phoneRightPadding) + " | " +
-                " ".repeat(positionLeftPadding) + "Chức vụ" + " ".repeat(positionRightPadding)
-                + " |\n";
+        String header = "| " + " ".repeat(NUMBER_WIDTH) + " | "
+                + padCenter("Tên", NAME_WIDTH) + " | "
+                + padCenter("Điện thoại", PHONE_WIDTH) + " | "
+                + padCenter("Vị trí", POSITION_WIDTH) + " |\n";
 
         String separateLine = "| " + "-".repeat(NUMBER_WIDTH) + " | " +
                 "-".repeat(NAME_WIDTH) + " | " +
@@ -239,27 +249,16 @@ public class AdminAccount extends Account {
 
         String content = "";
 
-        content += "Danh sach phong ban\n\n";
+        content += "Danh sách phòng ban\n\n";
         content += header;
         content += separateLine;
         for (int i = 0; i < departments.length; i++) {
             if (departments[i] != null) {
                 Department current = departments[i];
-
-                int numberLength = Integer.toString(i).length();
-                int nameLength = current.getName().length();
-                int phoneLength = current.getPhone().length();
-                int positionLength = current.getPosition().length();
-
-                int numberPadding = NUMBER_WIDTH - numberLength;
-                int namePadding = NAME_WIDTH - nameLength;
-                int phonePadding = PHONE_WIDTH - phoneLength;
-                int positionPadding = POSITION_WIDTH - positionLength;
-
-                content += "| " + " ".repeat(numberPadding) + (i + 1) + " | " +
-                        current.getName() + " ".repeat(namePadding) + " | " +
-                        " ".repeat(phonePadding) + current.getPhone() + " | " +
-                        current.getPosition() + " ".repeat(positionPadding) + " |\n";
+                content += "| " + padLeft(Integer.toString(i + 1), NUMBER_WIDTH) + " | "
+                        + padRight(current.getName(), NAME_WIDTH) + " | "
+                        + padLeft(current.getPhone(), PHONE_WIDTH) + " | "
+                        + padRight(current.getPosition(), POSITION_WIDTH) + " |\n";
             }
         }
 
@@ -301,20 +300,23 @@ public class AdminAccount extends Account {
         String subtitle = "Đặt trạng thái";
         String content = "Trạng thái hiện tại: " + employee.getStatus();
 
-        int statusNum = 0;
+        int statusNum;
         do {
             String[] options = { "Đang làm việc", "Đang nghỉ phép", "Đã nghỉ việc" };
-            statusNum = Integer.parseInt(console.printUI(title, subtitle, content, options, sc));
+            statusNum = validateInt(console.printUI(title, subtitle, content, options, sc).trim());
+            if (statusNum < 0 || 2 < statusNum) {
+                console.printResult(title, "Lựa chọn không hợp lệ", sc);
+            }
         } while (statusNum < 0 || 2 < statusNum);
 
         switch (statusNum) {
-            case 1:
+            case 0:
                 employee.setStatus(Employee.EmployeeStatus.WORKING);
                 break;
-            case 2:
+            case 1:
                 employee.setStatus(Employee.EmployeeStatus.ON_LEAVE);
                 break;
-            case 3:
+            case 2:
                 employee.setStatus(Employee.EmployeeStatus.RESIGNED);
                 break;
 
@@ -343,18 +345,23 @@ public class AdminAccount extends Account {
 
         String title = "Sửa nhân viên";
         String subtitle = "Đặt chức vụ";
-        String content = "Chức vụ hiện tại: " + employee.getPosition().getName() + "\n";
+        String currName = employee.getPosition() != null ? employee.getPosition().getName() : "Chưa có";
 
         int choice;
+        boolean valid;
         do {
-            content += getPositions(positions);
-            choice = Integer.parseInt(console.printUI(title, subtitle, content, sc));
-
-            if (positions[choice - 1] == null) {
+            String content = "Chức vụ hiện tại: " + currName + "\n" + getPositions(positions) + "\nNhập 0 để hủy";
+            choice = validateInt(console.printUI(title, subtitle, content, sc).trim());
+            if (choice == 0) {
+                return;
+            }
+            valid = choice >= 1 && choice <= positions.length && positions[choice - 1] != null;
+            if (!valid) {
                 console.printResult(title, "Chức vụ không tồn tại", sc);
             }
-        } while (positions[choice - 1] == null);
+        } while (!valid);
 
+        employee.setPosition(positions[choice - 1]);
         console.printResult(title, "Đặt chức vụ thành công", sc);
     }
 
@@ -363,18 +370,23 @@ public class AdminAccount extends Account {
 
         String title = "Sửa nhân viên";
         String subtitle = "Đặt phòng ban";
-        String content = "Phòng ban hiện tại: " + employee.getDepartment().getName() + "\n";
+        String currName = employee.getDepartment() != null ? employee.getDepartment().getName() : "Chưa có";
 
         int choice;
+        boolean valid;
         do {
-            content += getDepartments(departments);
-            choice = Integer.parseInt(console.printUI(title, subtitle, content, sc));
-
-            if (departments[choice - 1] == null) {
+            String content = "Phòng ban hiện tại: " + currName + "\n" + getDepartments(departments) + "\nNhập 0 để hủy";
+            choice = validateInt(console.printUI(title, subtitle, content, sc).trim());
+            if (choice == 0) {
+                return;
+            }
+            valid = choice >= 1 && choice <= departments.length && departments[choice - 1] != null;
+            if (!valid) {
                 console.printResult(title, "Phòng ban không tồn tại", sc);
             }
-        } while (departments[choice - 1] == null);
+        } while (!valid);
 
+        employee.setDepartment(departments[choice - 1]);
         console.printResult(title, "Đặt phòng ban thành công", sc);
     }
 
@@ -394,7 +406,7 @@ public class AdminAccount extends Account {
         do {
             String[] options = { "Thoát", "Ngày tuyển dụng", "Chuyên môn", "Trạng thái", "Mã số thuế", "Chức vụ",
                     "Phòng ban" };
-            setChoice = Integer.parseInt(console.printUI(title, subtitle, options, sc));
+            setChoice = validateInt(console.printUI(title, subtitle, options, sc).trim());
 
             switch (setChoice) {
                 case 0:
@@ -431,7 +443,7 @@ public class AdminAccount extends Account {
         ConsoleUI console = new ConsoleUI();
         SortData sort = new SortData();
         String title = "In nhân viên";
-        String subtitle = "Sắp xếp theo";
+        String subtitle = "Chọn một tùy chọn";
 
         Employee[] currEmployees = data.getEmployees();
 
@@ -526,7 +538,7 @@ public class AdminAccount extends Account {
 
         int sortBy;
         do {
-            String[] options = { "Tên", "Điện thoại", "Chức vụ" };
+            String[] options = { "Tên", "Hệ số chức vụ", "Trách nhiệm" };
             sortBy = validateInt(console.printUI(title, subtitle, options, sc));
 
             if (sortBy < 0 || 2 < sortBy) {
@@ -614,7 +626,7 @@ public class AdminAccount extends Account {
         String title = "Tìm phòng ban";
         String subtitle = "";
         String content = "";
-        String input = "Id";
+        String input = "Tên phòng ban";
 
         String name = console.printUI(title, subtitle, content, input, sc).toLowerCase();
 
@@ -650,7 +662,7 @@ public class AdminAccount extends Account {
         Account.AccountStatus status = Account.AccountStatus.ACTIVE;
         do {
             String[] options = { "Hoạt động", "Không hoạt động", "Đình chỉ", "Chờ xử lý", "Đã khóa", "Đã chấm dứt" };
-            statusNum = Integer.parseInt(console.printUI(title, subtitle, options, input, sc));
+            statusNum = validateInt(console.printUI(title, subtitle, options, sc).trim());
         } while (statusNum < 0 || 5 < statusNum);
 
         switch (statusNum) {
@@ -680,7 +692,7 @@ public class AdminAccount extends Account {
         int type;
         do {
             String[] options = { "Quản trị viên", "Nhân viên" };
-            type = Integer.parseInt(console.printUI(title, subtitle, options, input, sc));
+            type = validateInt(console.printUI(title, subtitle, options, sc).trim());
         } while (type != 0 && type != 1);
 
         if (type == 0) {
@@ -741,23 +753,23 @@ public class AdminAccount extends Account {
 
         String title = "Tạo nhân viên";
         String subtitle = "Tạo địa chỉ";
-        String contents = "";
+        String[] options = {};
         String input;
 
         input = "Số";
-        String number = console.printUI(title, subtitle, contents, input, sc);
+        String number = console.printUI(title, subtitle, options, input, sc);
 
         input = "Đường";
-        String street = console.printUI(title, subtitle, contents, input, sc);
+        String street = console.printUI(title, subtitle, options, input, sc);
 
         input = "Phường";
-        String ward = console.printUI(title, subtitle, contents, input, sc);
+        String ward = console.printUI(title, subtitle, options, input, sc);
 
         input = "Quận/Huyện";
-        String district = console.printUI(title, subtitle, contents, input, sc);
+        String district = console.printUI(title, subtitle, options, input, sc);
 
         input = "Thành phố";
-        String city = console.printUI(title, subtitle, contents, input, sc);
+        String city = console.printUI(title, subtitle, options, input, sc);
 
         return new Address(number, street, ward, district, city);
     }
@@ -781,7 +793,7 @@ public class AdminAccount extends Account {
         input = "Điểm công việc";
         double workScore = Double.parseDouble(console.printUI(title, subtitle, options, input, sc));
 
-        input = "Attitude score";
+        input = "Điểm thái độ";
         double attitudeScore = Double.parseDouble(console.printUI(title, subtitle, options, input, sc));
 
         input = "Điểm kỷ luật";
@@ -811,22 +823,22 @@ public class AdminAccount extends Account {
         LocalDate startDate;
         LocalDate endDate;
         do {
-            input = "Ngày bắt đầu: ";
-            startDate = LocalDate.parse(console.printUI(title, subtitle, options, input, sc), dateFormatter);
+            input = "Ngày bắt đầu (dd/MM/yyyy)";
+            startDate = console.printDateUI(title, subtitle, options, input, sc);
 
-            input = "Ngày kết thúc: ";
-            endDate = LocalDate.parse(console.printUI(title, subtitle, options, input, sc), dateFormatter);
+            input = "Ngày kết thúc (dd/MM/yyyy)";
+            endDate = console.printDateUI(title, subtitle, options, input, sc);
 
             if (startDate.isAfter(endDate)) {
-                System.out.println("Ngày bắt đầu nên trước ngày kết thúc");
+                console.printResult(title, "Ngày bắt đầu phải trước ngày kết thúc", sc);
             }
-        } while (startDate.isBefore(endDate));
+        } while (startDate.isAfter(endDate));
 
         int typeNum = 0;
         Contract.ContractType type = Contract.ContractType.TEMPORARY;
         do {
             String[] typeOptions = { "Thử việc", "Toàn thời gian", "Bán thời gian", "Tạm thời", "Có thời hạn",
-                    "Permanent" };
+                    "Vô thời hạn" };
             typeNum = validateInt(console.printUI(title, subtitle, typeOptions, input, sc));
 
             if (typeNum < 0 || 5 < typeNum) {
@@ -965,35 +977,6 @@ public class AdminAccount extends Account {
         return new Attendance(date, clockIn, clockOut);
     }
 
-    public Absence createAbsence(Scanner sc) {
-        ConsoleUI console = new ConsoleUI();
-
-        String title = "Tạo nhân viên";
-        String subtitle = "Tạo chấm công";
-        String content = "";
-        String[] options = {};
-        String input;
-
-        input = "Lý do";
-        String reason = console.printUI(title, subtitle, content, input, sc);
-
-        LocalDate fromDate;
-        LocalDate toDate;
-        do {
-            input = "Từ ngày (dd/MM/yyyy): ";
-            fromDate = console.printDateUI(title, subtitle, options, input, sc);
-
-            input = "Đến ngày (dd/MM/yyyy): ";
-            toDate = console.printDateUI(title, subtitle, options, input, sc);
-
-            if (fromDate.isAfter(toDate)) {
-                console.printResult(title, "Giờ vào nên trước giờ ra", sc);
-            }
-        } while (fromDate.isAfter(toDate));
-
-        return new Absence(reason, fromDate, toDate, Absence.AbsenceStatus.PENDING);
-    }
-
     public Insurance createInsurance(Scanner sc) {
         ConsoleUI console = new ConsoleUI();
 
@@ -1104,14 +1087,15 @@ public class AdminAccount extends Account {
                 break;
             }
 
-            if (index + 1 < limits.getMaxEvaluations()) {
-                String result = "Evaluation storage is full\n" + "Tối đa: %d" + limits.getMaxEvaluations();
+            if (index >= limits.getMaxEvaluations()) {
+                String result = "Danh sách đánh giá đã đầy\nTối đa: " + limits.getMaxEvaluations();
                 console.printResult(title, result, sc);
+                break;
             }
 
             evaluations[index] = createEvaluation(sc);
             index++;
-        } while (choice < 0 || 1 < choice);
+        } while (choice != 0);
 
         return evaluations;
     }
@@ -1139,14 +1123,15 @@ public class AdminAccount extends Account {
                 break;
             }
 
-            if (index + 1 < limits.getMaxContracts()) {
-                String result = "Contracts storage is full\n" + "Tối đa: %d" + limits.getMaxContracts();
+            if (index >= limits.getMaxContracts()) {
+                String result = "Danh sách hợp đồng đã đầy\nTối đa: " + limits.getMaxContracts();
                 console.printResult(title, result, sc);
+                break;
             }
 
             contracts[index] = createContract(sc);
             index++;
-        } while (choice < 0 || 1 < choice);
+        } while (choice != 0);
 
         return contracts;
     }
@@ -1174,14 +1159,15 @@ public class AdminAccount extends Account {
                 break;
             }
 
-            if (index + 1 < limits.getMaxPayrolls()) {
-                String result = "Payrolls storage is full\n" + "Tối đa: %d" + limits.getMaxPayrolls();
+            if (index >= limits.getMaxPayrolls()) {
+                String result = "Danh sách bảng lương đã đầy\nTối đa: " + limits.getMaxPayrolls();
                 console.printResult(title, result, sc);
+                break;
             }
 
             payrolls[index] = createPayroll(sc);
             index++;
-        } while (choice < 0 || 1 < choice);
+        } while (choice != 0);
 
         return payrolls;
     }
@@ -1209,51 +1195,17 @@ public class AdminAccount extends Account {
                 break;
             }
 
-            if (index + 1 < limits.getMaxAttendances()) {
-                String result = "Danh sách chấm công đã đầy\n" + "Tối đa: %d" + limits.getMaxAttendances();
+            if (index >= limits.getMaxAttendances()) {
+                String result = "Danh sách chấm công đã đầy\nTối đa: " + limits.getMaxAttendances();
                 console.printResult(title, result, sc);
+                break;
             }
 
             attendances[index] = createAttendance(sc);
             index++;
-        } while (choice < 0 || 1 < choice);
+        } while (choice != 0);
 
         return attendances;
-    }
-
-    public Absence[] createAbsences(LimitHandler limits, Scanner sc) {
-        ConsoleUI console = new ConsoleUI();
-
-        String title = "Tạo nhân viên";
-        String subtitle = "Tạo danh sách đơn xin nghỉ";
-        String[] options = { "Thoát", "Tạo đơn chấm công" };
-
-        int index = 0;
-        Absence[] absences = new Absence[limits.getMaxAbsences()];
-
-        int choice;
-        do {
-            choice = validateInt(console.printUI(title, subtitle, options, sc));
-
-            if (choice < 0 || 1 < choice) {
-                console.printResult(title, "Lựa chọn không hợp lệ", sc);
-                continue;
-            }
-
-            if (choice == 0) {
-                break;
-            }
-
-            if (index + 1 < limits.getMaxAbsences()) {
-                String result = "Danh sách xin nghỉ đã đầy\n" + "Tối đa: %d" + limits.getMaxAbsences();
-                console.printResult(title, result, sc);
-            }
-
-            absences[index] = createAbsence(sc);
-            index++;
-        } while (choice < 0 || 1 < choice);
-
-        return absences;
     }
 
     public Resignation createResignation(Scanner sc) {
@@ -1323,14 +1275,15 @@ public class AdminAccount extends Account {
                 break;
             }
 
-            if (index + 1 < limits.getMaxResignations()) {
-                String result = "Resignation storage is full\n" + "Tối đa: %d" + limits.getMaxResignations();
+            if (index >= limits.getMaxResignations()) {
+                String result = "Danh sách đơn thôi việc đã đầy\nTối đa: " + limits.getMaxResignations();
                 console.printResult(title, result, sc);
+                break;
             }
 
             resignations[index] = createResignation(sc);
             index++;
-        } while (choice < 0 || 1 < choice);
+        } while (choice != 0);
 
         return resignations;
     }
@@ -1358,19 +1311,20 @@ public class AdminAccount extends Account {
                 break;
             }
 
-            if (index + 1 < limits.getMaxInsurances()) {
-                String result = "Danh sách bảo hiểm đã đầy\n" + "Tối đa: %d" + limits.getMaxInsurances();
+            if (index >= limits.getMaxInsurances()) {
+                String result = "Danh sách bảo hiểm đã đầy\nTối đa: " + limits.getMaxInsurances();
                 console.printResult(title, result, sc);
+                break;
             }
 
             insurances[index] = createInsurance(sc);
             index++;
-        } while (choice < 0 || 1 < choice);
+        } while (choice != 0);
 
         return insurances;
     }
 
-    public int choosePosition(DataHandler data, LimitHandler limits, Scanner sc) {
+    public Position choosePosition(DataHandler data, LimitHandler limits, Scanner sc) {
         ConsoleUI console = new ConsoleUI();
 
         String title = "Tạo nhân viên";
@@ -1378,72 +1332,76 @@ public class AdminAccount extends Account {
 
         int positionsOccupied = 0;
         for (int i = 0; i < data.getPositions().length; i++) {
-            if (data.getPositions()[i] == null)
-                break;
-
-            positionsOccupied++;
+            if (data.getPositions()[i] != null) {
+                positionsOccupied++;
+            }
         }
 
-        if (positionsOccupied < 0) {
+        if (positionsOccupied == 0) {
             console.printResult(title, "Không có chức vụ nào", sc);
-            return -1;
+            return null;
         }
 
-        String[] options = new String[positionsOccupied];
-
-        for (int i = 0; i < positionsOccupied; i++) {
-            options[i] = data.getPositions()[i].getName();
+        String[] positionOptions = new String[positionsOccupied];
+        Position[] validPositions = new Position[positionsOccupied];
+        int k = 0;
+        for (int i = 0; i < data.getPositions().length; i++) {
+            if (data.getPositions()[i] != null) {
+                validPositions[k] = data.getPositions()[i];
+                positionOptions[k] = data.getPositions()[i].getName();
+                k++;
+            }
         }
 
         int index;
         do {
-
-            index = validateInt(console.printUI(title, subtitle, options, sc));
-
-            if (index < 0 || index > positionsOccupied) {
+            index = validateInt(console.printUI(title, subtitle, positionOptions, sc).trim());
+            if (index < 0 || index >= positionsOccupied) {
                 console.printResult(title, "Lựa chọn không hợp lệ", sc);
             }
-        } while (index < 0 || index > positionsOccupied);
+        } while (index < 0 || index >= positionsOccupied);
 
-        return index;
+        return validPositions[index];
     }
 
-    public int chooseDepartment(DataHandler data, LimitHandler limits, Scanner sc) {
+    public Department chooseDepartment(DataHandler data, LimitHandler limits, Scanner sc) {
         ConsoleUI console = new ConsoleUI();
 
         String title = "Tạo nhân viên";
-        String subtitle = "Chọn chức vụ";
+        String subtitle = "Chọn phòng ban";
 
         int departmentsOccupied = 0;
         for (int i = 0; i < data.getDepartments().length; i++) {
-            if (data.getDepartments()[i] == null)
-                break;
-
-            departmentsOccupied++;
+            if (data.getDepartments()[i] != null) {
+                departmentsOccupied++;
+            }
         }
 
-        if (departmentsOccupied < 0) {
-            console.printResult(title, "Không có chức vụ nào", sc);
-            return -1;
+        if (departmentsOccupied == 0) {
+            console.printResult(title, "Không có phòng ban nào", sc);
+            return null;
         }
 
-        String[] options = new String[departmentsOccupied];
-
-        for (int i = 0; i < departmentsOccupied; i++) {
-            options[i] = data.getDepartments()[i].getName();
+        String[] departmentOptions = new String[departmentsOccupied];
+        Department[] validDepartments = new Department[departmentsOccupied];
+        int k = 0;
+        for (int i = 0; i < data.getDepartments().length; i++) {
+            if (data.getDepartments()[i] != null) {
+                validDepartments[k] = data.getDepartments()[i];
+                departmentOptions[k] = data.getDepartments()[i].getName();
+                k++;
+            }
         }
 
         int index;
         do {
-
-            index = validateInt(console.printUI(title, subtitle, options, sc));
-
-            if (index < 0 || index > departmentsOccupied) {
+            index = validateInt(console.printUI(title, subtitle, departmentOptions, sc).trim());
+            if (index < 0 || index >= departmentsOccupied) {
                 console.printResult(title, "Lựa chọn không hợp lệ", sc);
             }
-        } while (index < 0 || index > departmentsOccupied);
+        } while (index < 0 || index >= departmentsOccupied);
 
-        return index;
+        return validDepartments[index];
     }
 
     public Employee createEmployee(DataHandler data, LimitHandler limits, Scanner sc) {
@@ -1475,69 +1433,53 @@ public class AdminAccount extends Account {
         input = "Địa chỉ";
         Address address = createAddress(sc);
 
-        String id = "EMP";
-        for (int i = 0; i < data.getEmployees().length; i++) {
-            Employee emp = data.getEmployees()[i];
-            if (emp == null) {
-                id += String.format("%03d", i + 1);
-                break;
-            }
-        }
+        input = "Id";
+        String id = console.printUI(title, subtitle, options, input, sc);
 
-        LocalDate hireDate;
-        long years;
-        do {
-            input = "Ngày tuyển dụng (dd/MM/yyyy)";
-            hireDate = console.printDateUI(title, subtitle, options, input, sc);
-
-            years = ChronoUnit.YEARS.between(dateOfBirth, hireDate);
-
-            if (dateOfBirth.isAfter(hireDate)) {
-                console.printResult(title, "Ngày tuyển dụng không thể trước ngày sinh", sc);
-            } else if (years < 18) {
-                console.printResult(title, "Không thể tuyển nhân viên trước 18 tuổi", sc);
-            }
-        } while (dateOfBirth.isAfter(hireDate) || years < 18);
+        input = "Ngày tuyển dụng (dd/MM/yyyy)";
+        LocalDate hireDate = console.printDateUI(title, subtitle, options, input, sc);
 
         input = "Chuyên môn";
         String specialization = console.printUI(title, subtitle, options, input, sc);
 
-        Employee.EmployeeStatus status = Employee.EmployeeStatus.WORKING;
+        Employee.EmployeeStatus status = chooseEmployeeStatus(sc);
 
-        Evaluation[] evaluations = new Evaluation[limits.getMaxEvaluations()];
-        Contract[] contracts = new Contract[limits.getMaxContracts()];
-        Payroll[] payrolls = new Payroll[limits.getMaxPayrolls()];
-        Attendance[] attendances = new Attendance[limits.getMaxAttendances()];
-        Absence[] absences = new Absence[limits.getMaxAbsences()];
-        Resignation[] resignations = new Resignation[limits.getMaxResignations()];
+        Evaluation[] evaluations = createEvaluations(limits, sc);
+        Contract[] contracts = createContracts(limits, sc);
+        Payroll[] payrolls = createPayrolls(limits, sc);
+        Attendance[] attendances = createAttendances(limits, sc);
+        Resignation[] resignations = createResignations(limits, sc);
 
         input = "Mã số thuế";
         String taxId = console.printUI(title, subtitle, options, input, sc);
 
-        Insurance[] insurances = new Insurance[limits.getMaxInsurances()];
+        Insurance[] insurances = createInsurances(limits, sc);
 
-        Position position = data.getPositions()[choosePosition(data, limits, sc)];
-        Department department = data.getDepartments()[chooseDepartment(data, limits, sc)];
+        Position position = choosePosition(data, limits, sc);
+        Department department = chooseDepartment(data, limits, sc);
 
+        Absence[] absences = new Absence[limits.getMaxAbsences()];
         return new Employee(firstName, lastName, email, phone, dateOfBirth, gender, address, id, hireDate,
-                specialization, status,
-                evaluations, contracts, payrolls, attendances, absences, resignations, taxId,
-                insurances, position, department);
+                specialization,
+                status, evaluations, contracts, payrolls, attendances, absences, resignations, taxId, insurances,
+                position, department);
     }
 
     private Employee selectEmployeePrompt(Employee[] employees, String title, Scanner sc) {
         ConsoleUI console = new ConsoleUI();
-        String content = "Nhân viêns list\n";
+        String content = "Danh sách nhân viên:\n";
+        boolean hasEmployee = false;
 
         for (int i = 0; i < employees.length; i++) {
             if (employees[i] != null) {
                 content += "- ID: " + employees[i].getId() + " | "
                         + employees[i].getFirstName() + " "
                         + employees[i].getLastName() + "\n";
+                hasEmployee = true;
             }
         }
 
-        if (content.equals("List Nhân viên:\n")) {
+        if (!hasEmployee) {
             console.printResult(title, "Danh sách nhân viên trống!", sc);
             return null;
         }
@@ -1587,7 +1529,7 @@ public class AdminAccount extends Account {
 
         String comment = console.printUI(title, subtitle, content, "Nhận xét đánh giá", sc).trim();
 
-        String[] scoreNames = { "Điểm công việc (0-10)", "Attitude score (0-10)", "Điểm kỷ luật (0-10)",
+        String[] scoreNames = { "Điểm công việc (0-10)", "Điểm thái độ (0-10)", "Điểm kỷ luật (0-10)",
                 "Chất lượng công việc (0-10)", "Năng suất (0-10)", "Làm việc nhóm (0-10)" };
         double[] scores = new double[scoreNames.length];
         for (int i = 0; i < scoreNames.length; i++) {
@@ -1648,7 +1590,7 @@ public class AdminAccount extends Account {
             } while (startDate.isAfter(endDate));
 
             String[] typeNames = { "Thử việc", "Toàn thời gian", "Bán thời gian", "Tạm thời", "Có thời hạn",
-                    "Permanent" };
+                    "Vô thời hạn" };
             Contract.ContractType[] types = {
                     Contract.ContractType.PROBATION,
                     Contract.ContractType.FULL_TIME,
@@ -1722,7 +1664,7 @@ public class AdminAccount extends Account {
 
         try {
             for (int i = 0; i < payrolls.length; i++) {
-                if (payrolls[i] != null && payrolls[i].getMonth().equals(month)) {
+                if (payrolls[i] != null && payrolls[i].getMonth() != null && payrolls[i].getMonth().equals(month)) {
                     console.printResult(title, "Bảng lương tháng này đã tồn tại", sc);
                     return;
                 }
@@ -1747,7 +1689,7 @@ public class AdminAccount extends Account {
             double totalHours = 0;
             Attendance[] attendances = employee.getAttendances();
             for (int i = 0; i < attendances.length; i++) {
-                if (attendances[i] != null && attendances[i].getDate().getMonthValue() == month.getMonthValue()
+                if (attendances[i] != null && attendances[i].getDate() != null && attendances[i].getDate().getMonthValue() == month.getMonthValue()
                         && attendances[i].getDate().getYear() == month.getYear()) {
                     totalHours += attendances[i].calculateWorkedHours();
                 }
@@ -1769,7 +1711,7 @@ public class AdminAccount extends Account {
             }
 
             payrolls[index] = newPayroll;
-            console.printResult(title, "Payroll added successfully\nSố giờ làm việc: " + workedHours
+            console.printResult(title, "Thêm bảng lương thành công\nSố giờ làm việc: " + workedHours
                     + "\nThưởng: " + newPayroll.getBonus(), sc);
         } catch (NumberFormatException e) {
             console.printResult(title, "Vui lòng nhập số cho các trường số!", sc);
@@ -1990,7 +1932,7 @@ public class AdminAccount extends Account {
 
         int sortBy;
         do {
-            String[] options = { "Tháng", "Điểm công việc", "Attitude score", "Điểm kỷ luật", "Chất lượng công việc",
+            String[] options = { "Tháng", "Điểm công việc", "Điểm thái độ", "Điểm kỷ luật", "Chất lượng công việc",
                     "Năng suất", "Làm việc nhóm" };
             sortBy = validateInt(console.printUI(title, subtitle, options, sc));
 
@@ -2296,7 +2238,7 @@ public class AdminAccount extends Account {
         int choice;
         boolean valid;
         do {
-            String content = getDepartments(departments) + "\nEnter 0 to go back\n";
+            String content = getDepartments(departments) + "\nNhập 0 để quay lại\n";
 
             try {
                 choice = Integer.parseInt(console.printUI(title, subtitle, content, sc).trim());
@@ -2427,7 +2369,7 @@ public class AdminAccount extends Account {
         int choice;
         boolean valid;
         do {
-            String content = getPositions(positions) + "\nEnter 0 to go back\n";
+            String content = getPositions(positions) + "\nNhập 0 để quay lại\n";
 
             try {
                 choice = Integer.parseInt(console.printUI(title, subtitle, content, sc).trim());
