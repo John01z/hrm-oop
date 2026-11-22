@@ -431,7 +431,7 @@ public class AdminAccount extends Account {
         ConsoleUI console = new ConsoleUI();
         SortData sort = new SortData();
         String title = "In nhân viên";
-        String subtitle = "Chọn một tùy chọn";
+        String subtitle = "Sắp xếp theo";
 
         Employee[] currEmployees = data.getEmployees();
 
