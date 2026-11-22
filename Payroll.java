@@ -58,13 +58,16 @@ public class Payroll {
         this.lastSalaryIncreaseDate = date;
     }
 
-    // Tiền thưởng = lương cơ bản * hệ số thưởng từ Evaluation
+    // Tien thuong = luong co ban * he so thuong tu Evaluation
     public double calculateBonus(Evaluation evaluation) {
+        if (evaluation == null) {
+            return 0;
+        }
         return baseSalary * evaluation.getBonusRate();
     }
 
-    // Giờ làm việc tiêu chuẩn trong tháng: 26 ngày x 8 giờ = 208 giờ.
-    // Tiền tăng ca được tính bằng 150% đơn giá lương một giờ.
+    // Gio lam viec tieu chuan trong thang: 26 ngay x 8 gio = 208 gio.
+    // Tien tang ca duoc tinh bang 150% don gia luong mot gio.
     public double calculateOvertimePay() {
         final int STANDARD_WORKING_HOURS = 208;
         final double OVERTIME_RATE = 1.5;
@@ -82,19 +85,20 @@ public class Payroll {
 
     public String getPayroll() {
         String content = "";
-        content += ("Tháng: " + month.getMonthValue() + "/" + month.getYear()) + "\n";
-        content += ("Lương cơ bản: " + baseSalary) + "\n";
-        content += ("Tiền thưởng: " + bonus) + "\n";
-        content += ("Phụ cấp: " + allowance) + "\n";
-        content += ("Khấu trừ: " + deduction) + "\n";
-        content += ("Tiền thuế: " + taxAmount) + "\n";
-        content += ("Tiền bảo hiểm: " + insuranceAmount) + "\n";
-        content += ("Số giờ làm việc: " + workedHours) + "\n";
-        content += ("Số giờ tăng ca: " + overtimeHours) + "\n";
-        content += ("Tiền lương tăng ca: " + calculateOvertimePay()) + "\n";
-        content += ("Ngày tăng lương gần nhất: "
-                + (lastSalaryIncreaseDate == null ? "Chưa có" : lastSalaryIncreaseDate)) + "\n";
-        content += ("Lương thực nhận: " + calculateNetSalary()) + "\n";
+        String monthStr = (month == null) ? "Chua co" : (month.getMonthValue() + "/" + month.getYear());
+        content += ("Thang: " + monthStr) + "\n";
+        content += ("Luong co ban: " + baseSalary) + "\n";
+        content += ("Tien thuong: " + bonus) + "\n";
+        content += ("Phu cap: " + allowance) + "\n";
+        content += ("Khau tru: " + deduction) + "\n";
+        content += ("Tien thue: " + taxAmount) + "\n";
+        content += ("Tien bao hiem: " + insuranceAmount) + "\n";
+        content += ("So gio lam viec: " + workedHours) + "\n";
+        content += ("So gio tang ca: " + overtimeHours) + "\n";
+        content += ("Tien luong tang ca: " + calculateOvertimePay()) + "\n";
+        content += ("Ngay tang luong gan nhat: "
+                + (lastSalaryIncreaseDate == null ? "Chua co" : lastSalaryIncreaseDate)) + "\n";
+        content += ("Luong thuc nhan: " + calculateNetSalary()) + "\n";
 
         return content;
     }
