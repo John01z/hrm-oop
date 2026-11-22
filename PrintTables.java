@@ -1,6 +1,9 @@
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class PrintTables {
+  private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
   private static String fit(String value, int width) {
     String text = value == null ? "" : value;
     if (text.length() > width)
@@ -63,7 +66,7 @@ public class PrintTables {
       for (Employee e : employees) {
         if (e != null) {
           appendRow(content, w, String.valueOf(e.getId()),
-              String.format("%s", e.getHireDate()),
+              String.format("%s", e.getHireDate().format(dateFormatter)),
               String.format("%s", e.getSpecialization()),
               String.format("%s", e.getStatus()),
               String.format("%s", e.getTaxId()),
