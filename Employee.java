@@ -41,27 +41,19 @@ public class Employee extends Person {
     this.department = null;
   }
 
-  public Employee(
-      String firstName,
-      String lastName,
-      String email,
-      String phone,
-      LocalDate dateOfBirth,
-      String gender,
-      Address address,
-      String id,
-      LocalDate hireDate,
-      String specialization,
-      Employee.EmployeeStatus status,
-      Evaluation[] evaluations,
-      Contract[] contracts,
-      Payroll[] payrolls,
-      Attendance[] attendances,
-      Absence[] absences,
-      Resignation[] resignations,
-      String taxId,
-      Insurance[] insurances,
-      Position position,
+  public Employee(String firstName, String lastName, String email, String phone, LocalDate dateOfBirth, String gender,
+      Address address, String id, LocalDate hireDate, String specialization, Employee.EmployeeStatus status,
+      Evaluation[] evaluations, Contract[] contracts, Payroll[] payrolls, Attendance[] attendances,
+      Resignation[] resignations, String taxId, Insurance[] insurances, Position position, Department department) {
+    this(firstName, lastName, email, phone, dateOfBirth, gender, address, id, hireDate, specialization,
+        status, evaluations, contracts, payrolls, attendances, new Absence[0], resignations, taxId, insurances,
+        position, department);
+  }
+
+  public Employee(String firstName, String lastName, String email, String phone, LocalDate dateOfBirth, String gender,
+      Address address, String id, LocalDate hireDate, String specialization, Employee.EmployeeStatus status,
+      Evaluation[] evaluations, Contract[] contracts, Payroll[] payrolls, Attendance[] attendances,
+      Absence[] absences, Resignation[] resignations, String taxId, Insurance[] insurances, Position position,
       Department department) {
     super(firstName, lastName, email, phone, dateOfBirth, gender, address);
     this.id = id;
@@ -80,81 +72,16 @@ public class Employee extends Person {
     this.department = department;
   }
 
-  private int getEvaluationsOccupied() {
-    int count = 0;
-    for (int i = 0; i < getEvaluations().length; i++) {
-      if (getEvaluations()[i] == null) {
-        break;
-      }
-
-      count++;
+  private int countNonNull(Object[] arr) {
+    if (arr == null) {
+      return 0;
     }
-
-    return count;
-  }
-
-  private int getContractsOccupied() {
     int count = 0;
-    for (int i = 0; i < getContracts().length; i++) {
-      if (getContracts()[i] == null) {
-        break;
+    for (Object item : arr) {
+      if (item != null) {
+        count++;
       }
-
-      count++;
     }
-
-    return count;
-  }
-
-  private int getPayrollsOccupied() {
-    int count = 0;
-    for (int i = 0; i < getPayrolls().length; i++) {
-      if (getPayrolls()[i] == null) {
-        break;
-      }
-
-      count++;
-    }
-
-    return count;
-  }
-
-  private int getAttendancesOccupied() {
-    int count = 0;
-    for (int i = 0; i < getAttendances().length; i++) {
-      if (getAttendances()[i] == null) {
-        break;
-      }
-
-      count++;
-    }
-
-    return count;
-  }
-
-  private int getResignationsOccupied() {
-    int count = 0;
-    for (int i = 0; i < getResignations().length; i++) {
-      if (getResignations()[i] == null) {
-        break;
-      }
-
-      count++;
-    }
-
-    return count;
-  }
-
-  private int getInsurancesOccupied() {
-    int count = 0;
-    for (int i = 0; i < getInsurances().length; i++) {
-      if (getInsurances()[i] == null) {
-        break;
-      }
-
-      count++;
-    }
-
     return count;
   }
 
@@ -165,15 +92,16 @@ public class Employee extends Person {
     content += "Ngày tuyển dụng: " + getHireDate() + "\n";
     content += "Chuyên môn: " + getSpecialization() + "\n";
     content += "Trạng thái: " + getStatus() + "\n";
-    content += "Số đánh giá: " + getEvaluationsOccupied() + "\n";
-    content += "Số hợp đồng: " + getContractsOccupied() + "\n";
-    content += "Số bảng lương: " + getPayrollsOccupied() + "\n";
-    content += "Số lượt chấm công: " + getAttendancesOccupied() + "\n";
-    content += "Số đơn thôi việc: " + getResignationsOccupied() + "\n";
+    content += "Số đánh giá: " + countNonNull(getEvaluations()) + "\n";
+    content += "Số hợp đồng: " + countNonNull(getContracts()) + "\n";
+    content += "Số bảng lương: " + countNonNull(getPayrolls()) + "\n";
+    content += "Số lượt chấm công: " + countNonNull(getAttendances()) + "\n";
+    content += "Số đơn nghỉ phép: " + countNonNull(getAbsences()) + "\n";
+    content += "Số đơn thôi việc: " + countNonNull(getResignations()) + "\n";
     content += "Mã số thuế: " + getTaxId() + "\n";
-    content += "Số bảo hiểm: " + getInsurancesOccupied() + "\n";
-    content += "Chức vụ: " + getPosition().getName() + "\n";
-    content += "Phòng ban: " + getDepartment().getName() + "\n";
+    content += "Số bảo hiểm: " + countNonNull(getInsurances()) + "\n";
+    content += "Chức vụ: " + (getPosition() != null ? getPosition().getName() : "Chưa có") + "\n";
+    content += "Phòng ban: " + (getDepartment() != null ? getDepartment().getName() : "Chưa có") + "\n";
 
     return content;
   }
