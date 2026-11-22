@@ -1508,7 +1508,7 @@ public class AdminAccount extends Account {
         input = "Chuyên môn";
         String specialization = console.printUI(title, subtitle, options, input, sc);
 
-        Employee.EmployeeStatus status = chooseEmployeeStatus(sc);
+        Employee.EmployeeStatus status = Employee.EmployeeStatus.WORKING;
 
         Evaluation[] evaluations = createEvaluations(limits, sc);
         Contract[] contracts = createContracts(limits, sc);
