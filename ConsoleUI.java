@@ -1,17 +1,28 @@
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Scanner;
 
 public class ConsoleUI {
   private static final int CONTENT_WIDTH = 120;
 
-  private void printCentered(String content) {
-    int leftPadding = (CONTENT_WIDTH - content.length()) / 2;
-    int rightPadding = CONTENT_WIDTH - content.length() - leftPadding;
+  private String safeFit(String text, int maxLen) {
+    if (text == null) {
+      return "";
+    }
+    if (text.length() > maxLen) {
+      return (maxLen > 3) ? text.substring(0, maxLen - 3) + "..." : text.substring(0, Math.max(0, maxLen));
+    }
+    return text;
+  }
 
-    System.out.printf("║%" + leftPadding + "s" +
-        "\u001B[1m" + "%s" + "\u001B[0m" +
-        "%" + rightPadding + "s║%n",
-        "", content, "");
+  private void printCentered(String content) {
+    String safe = safeFit(content, CONTENT_WIDTH);
+    int leftPadding = Math.max(0, (CONTENT_WIDTH - safe.length()) / 2);
+    int rightPadding = Math.max(0, CONTENT_WIDTH - safe.length() - leftPadding);
+
+    System.out.println("║" + " ".repeat(leftPadding)
+        + "\u001B[1m" + safe + "\u001B[0m"
+        + " ".repeat(rightPadding) + "║");
   }
 
   private void printHeader(String title) {
@@ -22,29 +33,22 @@ public class ConsoleUI {
   }
 
   private void printSubtitle(String subtitle) {
-    int rightPadding = CONTENT_WIDTH - 1 - subtitle.length();
-    System.out.printf("║ " +
-        "\u001B[3m" + "%s" + "\u001B[0m" +
-        " ".repeat(rightPadding) + "║%n", subtitle);
+    String safe = safeFit(subtitle, CONTENT_WIDTH - 2);
+    int rightPadding = Math.max(0, CONTENT_WIDTH - 1 - safe.length());
+    System.out.println("║ "
+        + "\u001B[3m" + safe + "\u001B[0m"
+        + " ".repeat(rightPadding) + "║");
   }
 
   private void printContent(String content) {
-    if (content == null) {
-      content = "N/A";
-    }
-
-    if (content.length() > CONTENT_WIDTH) {
-      content = content.substring(0, CONTENT_WIDTH - 3);
-      content += "...";
-    }
-
-    int rightPadding = CONTENT_WIDTH - 1 - content.length();
-    System.out.printf("║ %s" + " ".repeat(rightPadding) + "║%n", content);
+    String safe = safeFit(content, CONTENT_WIDTH - 2);
+    int rightPadding = Math.max(0, CONTENT_WIDTH - 1 - safe.length());
+    System.out.println("║ " + safe + " ".repeat(rightPadding) + "║");
   }
 
   private String printChoice(Scanner sc) {
-    int rightPadding = CONTENT_WIDTH - 1 - 8;
-    System.out.printf("║ Choice: " + " ".repeat(rightPadding) + "║%n");
+    int rightPadding = Math.max(0, CONTENT_WIDTH - 1 - 8);
+    System.out.println("║ Choice: " + " ".repeat(rightPadding) + "║");
     System.out.println("╚" + "═".repeat(CONTENT_WIDTH) + "╝");
 
     System.out.print("\u001B[1A");
@@ -56,25 +60,26 @@ public class ConsoleUI {
   }
 
   private String printChoice(String input, Scanner sc) {
-    int rightPadding = CONTENT_WIDTH - 1 - input.length() - 2;
-    System.out.printf("║ %s: " + " ".repeat(rightPadding) + "║%n", input);
+    String safeInput = safeFit(input, CONTENT_WIDTH - 10);
+    int rightPadding = Math.max(0, CONTENT_WIDTH - 1 - safeInput.length() - 2);
+    System.out.println("║ " + safeInput + ": " + " ".repeat(rightPadding) + "║");
     System.out.println("╚" + "═".repeat(CONTENT_WIDTH) + "╝");
 
     System.out.print("\u001B[1A");
     System.out.print("\u001B[1A");
-    System.out.printf("\u001B[" + (input.length() + 4) + "C");
+    System.out.print("\u001B[" + (safeInput.length() + 4) + "C");
     System.out.flush();
 
     return sc.nextLine();
   }
 
   private String printMenu(String subtitle, String[] options, Scanner sc) {
-    if (!subtitle.isEmpty()) {
+    if (subtitle != null && !subtitle.isEmpty()) {
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
       printSubtitle(subtitle);
     }
 
-    if (options.length != 0) {
+    if (options != null && options.length != 0) {
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
       for (int i = 0; i < options.length; i++) {
         String line = "[" + i + "] " + options[i];
@@ -88,13 +93,13 @@ public class ConsoleUI {
   }
 
   private String printMenu(String subtitle, String[] options, String input, Scanner sc) {
-    if (!subtitle.isEmpty()) {
+    if (subtitle != null && !subtitle.isEmpty()) {
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
       printSubtitle(subtitle);
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
     }
 
-    if (options.length != 0) {
+    if (options != null && options.length != 0) {
       for (int i = 0; i < options.length; i++) {
         String line = "[" + i + "] " + options[i];
         printContent(line);
@@ -107,13 +112,13 @@ public class ConsoleUI {
   }
 
   public String printMenu(String subtitle, String content, Scanner sc) {
-    if (!subtitle.isEmpty()) {
+    if (subtitle != null && !subtitle.isEmpty()) {
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
       printSubtitle(subtitle);
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
     }
 
-    String[] lines = content.split("\n");
+    String[] lines = (content == null ? "" : content).split("\n");
     if (lines.length != 0) {
       for (int i = 0; i < lines.length; i++) {
         printContent(lines[i]);
@@ -126,12 +131,12 @@ public class ConsoleUI {
   }
 
   public String printMenu(String subtitle, String content, String input, Scanner sc) {
-    if (!subtitle.isEmpty()) {
+    if (subtitle != null && !subtitle.isEmpty()) {
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
       printSubtitle(subtitle);
     }
 
-    String[] lines = content.split("\n");
+    String[] lines = (content == null ? "" : content).split("\n");
     System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
     if (lines.length != 0) {
       for (int i = 0; i < lines.length; i++) {
@@ -145,12 +150,12 @@ public class ConsoleUI {
   }
 
   public String printMenu(String subtitle, String content, String[] options, Scanner sc) {
-    if (!subtitle.isEmpty()) {
+    if (subtitle != null && !subtitle.isEmpty()) {
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
       printSubtitle(subtitle);
     }
 
-    String[] lines = content.split("\n");
+    String[] lines = (content == null ? "" : content).split("\n");
     System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
     if (lines.length != 0) {
       for (int i = 0; i < lines.length; i++) {
@@ -160,7 +165,7 @@ public class ConsoleUI {
       System.out.println("╠" + "═".repeat(CONTENT_WIDTH) + "╣");
     }
 
-    if (options.length != 0) {
+    if (options != null && options.length != 0) {
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
       for (int i = 0; i < options.length; i++) {
         String line = "[" + i + "] " + options[i];
@@ -174,13 +179,13 @@ public class ConsoleUI {
   }
 
   public String printMenu(String subtitle, String content, String[] options, String input, Scanner sc) {
-    if (!subtitle.isEmpty()) {
+    if (subtitle != null && !subtitle.isEmpty()) {
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
       printSubtitle(subtitle);
       System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
     }
 
-    String[] lines = content.split("\n");
+    String[] lines = (content == null ? "" : content).split("\n");
     if (lines.length != 0) {
       for (int i = 0; i < lines.length; i++) {
         printContent(lines[i]);
@@ -189,7 +194,7 @@ public class ConsoleUI {
       System.out.println("╠" + "═".repeat(CONTENT_WIDTH) + "╣");
     }
 
-    if (options.length != 0) {
+    if (options != null && options.length != 0) {
       for (int i = 0; i < options.length; i++) {
         String line = "[" + i + "] " + options[i];
         printContent(line);
@@ -234,7 +239,7 @@ public class ConsoleUI {
   public void printResult(String title, String result, Scanner sc) {
     printHeader(title);
 
-    String[] lines = result.split("\n");
+    String[] lines = (result == null ? "" : result).split("\n");
 
     System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
     for (int i = 0; i < lines.length; i++) {
@@ -251,12 +256,16 @@ public class ConsoleUI {
   public LocalDate printDateUI(String title, String subtitle, String[] options, String input, Scanner sc) {
     DataCheck checker = new DataCheck("^(\\d{2})/(\\d{2})/(\\d{4})$");
     while (true) {
-      String date = printUI(title, subtitle, options, input, sc);
+      String date = printUI(title, subtitle, options, input, sc).trim();
       if (checker.check(date)) {
-        int day = Integer.parseInt(date.substring(0, 2));
-        int month = Integer.parseInt(date.substring(3, 5));
-        int year = Integer.parseInt(date.substring(6, 10));
-        return LocalDate.of(year, month, day);
+        try {
+          int day = Integer.parseInt(date.substring(0, 2));
+          int month = Integer.parseInt(date.substring(3, 5));
+          int year = Integer.parseInt(date.substring(6, 10));
+          return LocalDate.of(year, month, day);
+        } catch (DateTimeException e) {
+          printResult(title, "Ngày không tồn tại trên lịch! Vui lòng nhập lại.", sc);
+        }
       } else {
         printResult(title, "Ngày không hợp lệ! Vui lòng nhập lại.", sc);
       }
@@ -266,12 +275,16 @@ public class ConsoleUI {
   public LocalDate printDateUI(String title, String subtitle, String content, String input, Scanner sc) {
     DataCheck checker = new DataCheck("^(\\d{2})/(\\d{2})/(\\d{4})$");
     while (true) {
-      String date = printUI(title, subtitle, content, input, sc);
+      String date = printUI(title, subtitle, content, input, sc).trim();
       if (checker.check(date)) {
-        int day = Integer.parseInt(date.substring(0, 2));
-        int month = Integer.parseInt(date.substring(3, 5));
-        int year = Integer.parseInt(date.substring(6, 10));
-        return LocalDate.of(year, month, day);
+        try {
+          int day = Integer.parseInt(date.substring(0, 2));
+          int month = Integer.parseInt(date.substring(3, 5));
+          int year = Integer.parseInt(date.substring(6, 10));
+          return LocalDate.of(year, month, day);
+        } catch (DateTimeException e) {
+          printResult(title, "Ngày không tồn tại trên lịch! Vui lòng nhập lại.", sc);
+        }
       } else {
         printResult(title, "Ngày không hợp lệ! Vui lòng nhập lại.", sc);
       }
@@ -282,16 +295,21 @@ public class ConsoleUI {
     printHeader(title);
 
     int idx = 0;
-    for (int i = 0; i < sectionNames.length; i++) {
-      System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
-      System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
-      printSubtitle(sectionNames[i]);
-      System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
+    if (sectionNames != null && sections != null) {
+      int limit = Math.min(sectionNames.length, sections.length);
+      for (int i = 0; i < limit; i++) {
+        System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
+        System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
+        printSubtitle(sectionNames[i]);
+        System.out.println("║" + " ".repeat(CONTENT_WIDTH) + "║");
 
-      for (int j = 0; j < sections[i].length; j++) {
-        String line = "[" + idx + "] " + sections[i][j];
-        printContent(line);
-        idx++;
+        if (sections[i] != null) {
+          for (int j = 0; j < sections[i].length; j++) {
+            String line = "[" + idx + "] " + sections[i][j];
+            printContent(line);
+            idx++;
+          }
+        }
       }
     }
 
