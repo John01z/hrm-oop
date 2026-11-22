@@ -1480,8 +1480,14 @@ public class AdminAccount extends Account {
         input = "Địa chỉ";
         Address address = createAddress(sc);
 
-        input = "Id";
-        String id = console.printUI(title, subtitle, options, input, sc);
+        String id = "EMP";
+        for (int i = 0; i < data.getEmployees().length; i++) {
+            Employee emp = data.getEmployees()[i];
+            if (emp == null) {
+                id += String.format("%03d", i + 1);
+                break;
+            }
+        }
 
         input = "Ngày tuyển dụng (dd/MM/yyyy)";
         LocalDate hireDate = console.printDateUI(title, subtitle, options, input, sc);
