@@ -1015,7 +1015,7 @@ public class AdminAccount extends Account {
         } while (startDate.isAfter(endDate));
 
         input = "Mức: ";
-        double rate = Double.parseDouble(console.printUI(title, subtitle, options, input, sc));
+        double rate = Double.parseDouble(console.printUI(title, subtitle, options, input, sc).trim());
 
         return new Insurance(insuranceNumber, type, startDate, endDate, rate);
     }
